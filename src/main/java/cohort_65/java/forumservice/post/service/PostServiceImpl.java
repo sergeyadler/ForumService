@@ -1,9 +1,7 @@
 package cohort_65.java.forumservice.post.service;
 
 import cohort_65.java.forumservice.post.dao.PostRepository;
-import cohort_65.java.forumservice.post.dto.CommentDto;
-import cohort_65.java.forumservice.post.dto.NewPostDto;
-import cohort_65.java.forumservice.post.dto.PostDto;
+import cohort_65.java.forumservice.post.dto.*;
 import cohort_65.java.forumservice.post.dto.exception.PostNotFoundexeption;
 import cohort_65.java.forumservice.post.model.Comment;
 import cohort_65.java.forumservice.post.model.Post;
@@ -51,6 +49,10 @@ public class PostServiceImpl implements PostService {
         if (updatePostDto.getContent() != null) {
             post.setContent(updatePostDto.getContent());
         }
+        Set<String> tags = updatePostDto.getTags();
+        if (tags != null) {
+            tags.forEach(post::addTag);
+        }
         postRepository.save(post);
         return modelMapper.map(post, PostDto.class);
     }
@@ -63,15 +65,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDto addLike(String id) {
+    public void addLike(String id) {
         Post post = postRepository.findById(id).orElseThrow(PostNotFoundexeption::new);
         post.addLikes();
         postRepository.save(post);
-        return modelMapper.map(post, PostDto.class);
     }
 
     @Override
-    public PostDto addComment(String id, String user, CommentDto commentDto) {
+    public PostDto addComment(String id, String user, NewCommentDto commentDto) {
         Post post = postRepository.findById(id).orElseThrow(PostNotFoundexeption::new);
         post.addComment(new Comment(user,commentDto.getMessage()));
         postRepository.save(post);
@@ -85,6 +86,7 @@ public class PostServiceImpl implements PostService {
                 .toList();
     }
 
+
     @Override
     public List<PostDto> findPostsByTags(Set<String> tags) {
         return postRepository.findAllByTagsIn(tags).stream()
@@ -93,8 +95,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> findPostsByPeriod(LocalDateTime from, LocalDateTime to) {
-        return postRepository.findAllByDateCreatedBetweenOrderByDateCreatedDesc(from,to).stream()
+    public List<PostDto> findPostsByPeriod(DataPeriodDto dataPeriodDto) {
+        return postRepository.findPostByDateCreatedBetween(dataPeriodDto.getDateFrom(),dataPeriodDto.getDateTo()).stream()
                 .map(p -> modelMapper.map(p, PostDto.class))
                 .toList();
     }

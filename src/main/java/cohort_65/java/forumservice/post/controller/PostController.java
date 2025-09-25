@@ -1,11 +1,11 @@
 package cohort_65.java.forumservice.post.controller;
 
-import cohort_65.java.forumservice.post.dto.CommentDto;
-import cohort_65.java.forumservice.post.dto.NewPostDto;
-import cohort_65.java.forumservice.post.dto.PostDto;
+import cohort_65.java.forumservice.post.dto.*;
 import cohort_65.java.forumservice.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -49,14 +49,22 @@ public class PostController {
 
     @PutMapping("post/{id}/like")
 
-    public PostDto likePost(@PathVariable String id) {
-        return postService.addLike(id);
+//    public ResponseEntity<Void> likePost(@PathVariable String id) {
+//        postService.addLike(id);
+//        return ResponseEntity.noContent().build(); //Вариант сделать 204 NO CONTENT
+//
+//    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void likePost(@PathVariable String id) {
+        postService.addLike(id);
+
     }
 
     @PutMapping("post/{id}/comment/{user}")
 
-    public PostDto commentPost(@PathVariable String id, @PathVariable String user, @RequestBody CommentDto commentDto) {
-        return postService.addComment(id, user, commentDto);
+    public PostDto commentPost(@PathVariable String id, @PathVariable String user, @RequestBody NewCommentDto message) {
+        return postService.addComment(id, user, message);
     }
 
     @GetMapping("posts/author/{user}")
@@ -67,27 +75,27 @@ public class PostController {
     public List<PostDto> findPostsByTags(@RequestBody Set<String> tags) {
         return postService.findPostsByTags(tags);
     }
-//    @PostMapping("posts/period")
-//    public List<PostDto> findPostsByPeriod1(@RequestBody LocalDateTime from, @RequestBody LocalDateTime to) {
+    @PostMapping("posts/period")
+    public List<PostDto> findPostsByPeriod1(@RequestBody DataPeriodDto dataPeriodDto) {
+        return postService.findPostsByPeriod(dataPeriodDto);
+    }
+
+//    @PostMapping("/posts/period")
+//    public List<PostDto> findPostsByPeriod(@RequestBody Map<String, String> body) {
+//        String fromStr = body.get("dateFrom");
+//        String toStr   = body.get("dateTo");
+//        if (fromStr == null || toStr == null) return List.of();
+//
+//        LocalDate fromDate = LocalDate.parse(fromStr); // "2020-08-25"
+//        LocalDate toDate   = LocalDate.parse(toStr);   // "2020-08-26"
+//
+//        // включительно: [dateFrom 00:00:00, dateTo 23:59:59.999]
+//        LocalDateTime from = fromDate.atStartOfDay();
+//        LocalDateTime to   = toDate.atTime(23, 59, 59, 999_000_000);
+//
+//        if (from.isAfter(to)) { var t = from; from = to; to = t; } // на всякий
+//
 //        return postService.findPostsByPeriod(from, to);
 //    }
-
-    @PostMapping("/posts/period")
-    public List<PostDto> findPostsByPeriod(@RequestBody Map<String, String> body) {
-        String fromStr = body.get("dateFrom");
-        String toStr   = body.get("dateTo");
-        if (fromStr == null || toStr == null) return List.of();
-
-        LocalDate fromDate = LocalDate.parse(fromStr); // "2020-08-25"
-        LocalDate toDate   = LocalDate.parse(toStr);   // "2020-08-26"
-
-        // включительно: [dateFrom 00:00:00, dateTo 23:59:59.999]
-        LocalDateTime from = fromDate.atStartOfDay();
-        LocalDateTime to   = toDate.atTime(23, 59, 59, 999_000_000);
-
-        if (from.isAfter(to)) { var t = from; from = to; to = t; } // на всякий
-
-        return postService.findPostsByPeriod(from, to);
-    }
 
 }

@@ -1,8 +1,6 @@
 package cohort_65.java.forumservice.post.service;
 
-import cohort_65.java.forumservice.post.dto.CommentDto;
-import cohort_65.java.forumservice.post.dto.NewPostDto;
-import cohort_65.java.forumservice.post.dto.PostDto;
+import cohort_65.java.forumservice.post.dto.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,12 +16,12 @@ public interface PostService {
     PostDto deletePost(String id);
 
 
-    PostDto addLike (String id);
-    PostDto addComment(String id,String user, CommentDto commentDto);
+    void addLike (String id);
+    PostDto addComment(String id,String user, NewCommentDto commentDto);
 
     List<PostDto> findPostsByAuthor(String author);
     List<PostDto> findPostsByTags(Set<String> tags);
-    List<PostDto> findPostsByPeriod (LocalDateTime from, LocalDateTime to);
+    List<PostDto> findPostsByPeriod (DataPeriodDto dataPeriodDto);
 
 
 }
